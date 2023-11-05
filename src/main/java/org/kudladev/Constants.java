@@ -12,7 +12,8 @@ public final class Constants {
     public static final int INFO_HEIGHT = 200;
     public static final int GAME_HEIGHT = 400;
 
-    public static final int GRAVITY = 100;
+    public static final int GRAVITY = 400;
+    public static final int JUMPFORCE = 300;
 
     public static final int FPS = 100;
 

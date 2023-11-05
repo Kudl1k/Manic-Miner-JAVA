@@ -39,31 +39,49 @@ public class DrawingThread extends AnimationTimer {
             switch (keyEvent.getCode()){
                 case A -> {
                     west = true;
-                    this.world.getPlayer().setVelocity(-this.world.getPlayer().getSpeed(),this.world.getPlayer().getVelocity().getY());
+                    if (this.world.getPlayer().onGround()){
+                        if (this.world.getPlayer().checkCollision(Direction.LEFT)){
+                            this.world.getPlayer().setVelocity(-this.world.getPlayer().getSpeed(),this.world.getPlayer().getVelocity().getY());
+                        }
+                    }
+
                 }
                 case D -> {
                     east = true;
-                    this.world.getPlayer().setVelocity(this.world.getPlayer().getSpeed(),this.world.getPlayer().getVelocity().getY());
-
+                    if (this.world.getPlayer().onGround()){
+                        if (this.world.getPlayer().checkCollision(Direction.RIGHT)){
+                            this.world.getPlayer().setVelocity(this.world.getPlayer().getSpeed(),this.world.getPlayer().getVelocity().getY());
+                        }
+                    }
                 }
                 case SPACE -> {
-                    //TODO:
+                    if (this.world.getPlayer().onGround()){
+                        this.world.getPlayer().jump();
+                    }
                 }
             }
         });
         gameCanvas.setOnKeyReleased(keyEvent -> {
             switch (keyEvent.getCode()){
                 case A -> {
+                    if (this.world.getPlayer().onGround()){
+                        if (this.world.getPlayer().checkCollision(Direction.LEFT)){
+                            this.world.getPlayer().setVelocity(0,this.world.getPlayer().getVelocity().getY());
+                        }
+                    }
                     west = false;
-                    this.world.getPlayer().setVelocity(0,this.world.getPlayer().getVelocity().getY());
+
                 }
                 case D -> {
+                    if (this.world.getPlayer().onGround()){
+                        if (this.world.getPlayer().checkCollision(Direction.RIGHT)){
+                            this.world.getPlayer().setVelocity(0,this.world.getPlayer().getVelocity().getY());
+                        }
+                    }
                     east = false;
-                    this.world.getPlayer().setVelocity(0,this.world.getPlayer().getVelocity().getY());
 
                 }
             }
-            System.out.println(this.world.getPlayer().getVelocity());
         });
         gameCanvas.requestFocus();
     }
@@ -84,9 +102,10 @@ public class DrawingThread extends AnimationTimer {
             ic.fillRect(0,0,infoCanvas.getWidth(),infoCanvas.getHeight());
             world.draw(gc,ic);
             if (lastTime > 0) {
-
+                if (this.world.getPlayer().onGround() && !this.world.getPlayer().isJumped() && !west && !east){
+                    this.world.getPlayer().setVelocity(0,this.world.getPlayer().getVelocity().getY());
+                }
                 world.getPlayer().movement(deltaT);
-
             }
             lastTime = now;
         }
