@@ -39,20 +39,9 @@ public class DrawingThread extends AnimationTimer {
             switch (keyEvent.getCode()){
                 case A -> {
                     west = true;
-                    if (this.world.getPlayer().onGround()){
-                        if (this.world.getPlayer().checkCollision(Direction.LEFT)){
-                            this.world.getPlayer().setVelocity(-this.world.getPlayer().getSpeed(),this.world.getPlayer().getVelocity().getY());
-                        }
-                    }
-
                 }
                 case D -> {
                     east = true;
-                    if (this.world.getPlayer().onGround()){
-                        if (this.world.getPlayer().checkCollision(Direction.RIGHT)){
-                            this.world.getPlayer().setVelocity(this.world.getPlayer().getSpeed(),this.world.getPlayer().getVelocity().getY());
-                        }
-                    }
                 }
                 case SPACE -> {
                     if (this.world.getPlayer().onGround()){
@@ -66,7 +55,10 @@ public class DrawingThread extends AnimationTimer {
                 case A -> {
                     if (this.world.getPlayer().onGround()){
                         if (this.world.getPlayer().checkCollision(Direction.LEFT)){
-                            this.world.getPlayer().setVelocity(0,this.world.getPlayer().getVelocity().getY());
+                            if (this.world.getPlayer().canGoThrough(Direction.LEFT)){
+                                this.world.getPlayer().setDir(Direction.NONE);
+                                this.world.getPlayer().setVelocity(0,this.world.getPlayer().getVelocity().getY());
+                            }
                         }
                     }
                     west = false;
@@ -75,7 +67,10 @@ public class DrawingThread extends AnimationTimer {
                 case D -> {
                     if (this.world.getPlayer().onGround()){
                         if (this.world.getPlayer().checkCollision(Direction.RIGHT)){
-                            this.world.getPlayer().setVelocity(0,this.world.getPlayer().getVelocity().getY());
+                            if (this.world.getPlayer().canGoThrough(Direction.RIGHT)){
+                                this.world.getPlayer().setDir(Direction.NONE);
+                                this.world.getPlayer().setVelocity(0,this.world.getPlayer().getVelocity().getY());
+                            }
                         }
                     }
                     east = false;
@@ -90,25 +85,41 @@ public class DrawingThread extends AnimationTimer {
 
     @Override
     public void handle(long now) {
-
-
         double deltaT = (now - lastTime) / 1e9;
-        if (deltaT >= 1./Constants.FPS) {
+
+        if (west) {
+            if (this.world.getPlayer().onGround()){
+                if (this.world.getPlayer().checkCollision(Direction.LEFT)){
+
+                }
+            }
+        } else if (east) {
+            if (this.world.getPlayer().onGround()){
+                if (this.world.getPlayer().checkCollision(Direction.RIGHT)){
+
+                }
+            }
+        } else {
+            if (this.world.getPlayer().onGround() && !this.world.getPlayer().isJumped()) {
+                this.world.getPlayer().setVelocity(0, this.world.getPlayer().getVelocity().getY());
+            }
+        }
+
+        if (deltaT >= 1. / Constants.FPS) {
             gc.clearRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
             gc.setFill(Color.BLACK);
-            gc.fillRect(0,0,gameCanvas.getWidth(),gameCanvas.getHeight());
-            ic.clearRect(0,0, infoCanvas.getWidth(),infoCanvas.getHeight());
+            gc.fillRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
+            ic.clearRect(0, 0, infoCanvas.getWidth(), infoCanvas.getHeight());
             ic.setFill(Color.RED);
-            ic.fillRect(0,0,infoCanvas.getWidth(),infoCanvas.getHeight());
-            world.draw(gc,ic);
+            ic.fillRect(0, 0, infoCanvas.getWidth(), infoCanvas.getHeight());
+            world.draw(gc, ic);
             if (lastTime > 0) {
-                if (this.world.getPlayer().onGround() && !this.world.getPlayer().isJumped() && !west && !east){
-                    this.world.getPlayer().setVelocity(0,this.world.getPlayer().getVelocity().getY());
+                if (this.world.getPlayer().onGround() && !this.world.getPlayer().isJumped() && !west && !east) {
+                    this.world.getPlayer().setVelocity(0, this.world.getPlayer().getVelocity().getY());
                 }
                 world.getPlayer().movement(deltaT);
             }
             lastTime = now;
         }
-
     }
 }

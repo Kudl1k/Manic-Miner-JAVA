@@ -23,20 +23,28 @@ public class World {
                 new GameObject(
                         0,
                         gameSize.getY(),
-                        gameSize.getX()
+                        gameSize.getX(),
+                        false,
+                        false
                 ),
                 //First platform
                 new GameObject(
-                        75,
-                        gameSize.getY()-75,
-                        100
+                        100,
+                        gameSize.getY()-51,
+                        400,
+                        true,
+                        false
                 ),
-                //Second platfom
+                //Second platform
                 new GameObject(
-                        175,
-                        gameSize.getY()-100,
-                        100
+                        500,
+                        gameSize.getY()-76,
+                        100,
+                        false,
+                        false
+
                 )
+
         };
         this.player = new Player(this);
     }
