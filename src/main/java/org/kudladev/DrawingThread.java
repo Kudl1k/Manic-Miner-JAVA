@@ -90,7 +90,11 @@ public class DrawingThread extends AnimationTimer {
                 this.world.getPlayer().setVelocity(0, this.world.getPlayer().getVelocity().getY());
             }
         }
+        if (this.world.getPlayer().onGround() && this.world.getPlayer().getGround().isFallable()){
+            this.world.getPlayer().getGround().shrinkPlatform();
+        }
         this.world.getPlayer().fall();
+        this.world.deleteFeltPlatforms();
         if (deltaT >= 1. / Constants.FPS) {
             gc.clearRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
             gc.setFill(Color.BLACK);
