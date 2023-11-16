@@ -43,6 +43,15 @@ public class World {
                         false,
                         false
 
+                ),
+                //Third platform
+                new GameObject(
+                        450,
+                        gameSize.getY()-160,
+                        100,
+                        false,
+                        false
+
                 )
 
         };

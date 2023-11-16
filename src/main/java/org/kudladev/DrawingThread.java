@@ -54,24 +54,14 @@ public class DrawingThread extends AnimationTimer {
             switch (keyEvent.getCode()){
                 case A -> {
                     if (this.world.getPlayer().onGround()){
-                        if (this.world.getPlayer().checkCollision(Direction.LEFT)){
-                            if (this.world.getPlayer().canGoThrough(Direction.LEFT)){
-                                this.world.getPlayer().setDir(Direction.NONE);
-                                this.world.getPlayer().setVelocity(0,this.world.getPlayer().getVelocity().getY());
-                            }
-                        }
+                        this.world.getPlayer().checkCollision(Direction.LEFT);
                     }
                     west = false;
 
                 }
                 case D -> {
                     if (this.world.getPlayer().onGround()){
-                        if (this.world.getPlayer().checkCollision(Direction.RIGHT)){
-                            if (this.world.getPlayer().canGoThrough(Direction.RIGHT)){
-                                this.world.getPlayer().setDir(Direction.NONE);
-                                this.world.getPlayer().setVelocity(0,this.world.getPlayer().getVelocity().getY());
-                            }
-                        }
+                        this.world.getPlayer().checkCollision(Direction.RIGHT);
                     }
                     east = false;
 
@@ -89,22 +79,18 @@ public class DrawingThread extends AnimationTimer {
 
         if (west) {
             if (this.world.getPlayer().onGround()){
-                if (this.world.getPlayer().checkCollision(Direction.LEFT)){
-
-                }
+                this.world.getPlayer().checkCollision(Direction.LEFT);
             }
         } else if (east) {
             if (this.world.getPlayer().onGround()){
-                if (this.world.getPlayer().checkCollision(Direction.RIGHT)){
-
-                }
+                this.world.getPlayer().checkCollision(Direction.RIGHT);
             }
-        } else {
+        }else {
             if (this.world.getPlayer().onGround() && !this.world.getPlayer().isJumped()) {
                 this.world.getPlayer().setVelocity(0, this.world.getPlayer().getVelocity().getY());
             }
         }
-
+        this.world.getPlayer().fall();
         if (deltaT >= 1. / Constants.FPS) {
             gc.clearRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
             gc.setFill(Color.BLACK);

@@ -78,6 +78,8 @@ public class Player implements DrawableObject {
             // Fixing position if player is above the top boundary
             this.position = new Point2D(this.position.getX(), 0);
             velocity = new Point2D(velocity.getX(), Constants.GRAVITY); // start falling again
+        } else if (this.jumped && !canGoThrough(Direction.NONE)) {
+            this.velocity = new Point2D(0,100);
         } else if (this.onGround() && velocity.getY() > 0) {
             // Fixing position if player is below the bottom boundary
             this.position = new Point2D(this.position.getX(), ground.getObject().getMinY() - this.size.getY());
@@ -94,35 +96,25 @@ public class Player implements DrawableObject {
 
     }
 
-    public boolean checkCollision(Direction dir) {
+    public void checkCollision(Direction dir) {
         switch (dir) {
             case RIGHT -> {
                 if (getBoundingBox().getMaxX() < world.getGameSize().getX()) {
                     if (this.world.getPlayer().canGoThrough(Direction.RIGHT)) {
                         this.world.getPlayer().setVelocity(this.world.getPlayer().getSpeed(), this.world.getPlayer().getVelocity().getY());
-                        fall();
                         this.world.getPlayer().setDir(Direction.RIGHT);
-                        return true;
                     }
-
-                } else {
-                    return false;
                 }
             }
             case LEFT -> {
                 if (getBoundingBox().getMinX() >= 0) {
                     if (this.world.getPlayer().canGoThrough(Direction.LEFT)){
                         this.world.getPlayer().setVelocity(-this.world.getPlayer().getSpeed(),this.world.getPlayer().getVelocity().getY());
-                        fall();
                         this.world.getPlayer().setDir(Direction.LEFT);
-                        return true;
                     }
-                } else {
-                    return false;
                 }
             }
         }
-        return true;
     }
 
 
@@ -200,12 +192,4 @@ public class Player implements DrawableObject {
         this.dir = dir;
     }
 }
-
-
-
-
-
-
-
-
 
