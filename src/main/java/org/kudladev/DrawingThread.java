@@ -38,10 +38,14 @@ public class DrawingThread extends AnimationTimer {
         gameCanvas.setOnKeyPressed(keyEvent -> {
             switch (keyEvent.getCode()){
                 case A -> {
-                    west = true;
+                    if (!east){
+                        west = true;
+                    }
                 }
                 case D -> {
-                    east = true;
+                    if (!west){
+                        east = true;
+                    }
                 }
                 case SPACE -> {
                     if (this.world.getPlayer().onGround()){
@@ -53,18 +57,16 @@ public class DrawingThread extends AnimationTimer {
         gameCanvas.setOnKeyReleased(keyEvent -> {
             switch (keyEvent.getCode()){
                 case A -> {
+                    west = false;
                     if (this.world.getPlayer().onGround()){
                         this.world.getPlayer().checkCollision(Direction.LEFT);
                     }
-                    west = false;
-
                 }
                 case D -> {
+                    east = false;
                     if (this.world.getPlayer().onGround()){
                         this.world.getPlayer().checkCollision(Direction.RIGHT);
                     }
-                    east = false;
-
                 }
             }
         });
@@ -85,15 +87,15 @@ public class DrawingThread extends AnimationTimer {
             if (this.world.getPlayer().onGround()){
                 this.world.getPlayer().checkCollision(Direction.RIGHT);
             }
-        }else {
-            if (this.world.getPlayer().onGround() && !this.world.getPlayer().isJumped()) {
-                this.world.getPlayer().setVelocity(0, this.world.getPlayer().getVelocity().getY());
-            }
+        }else if (this.world.getPlayer().onGround() && !this.world.getPlayer().isJumped()) {
+            this.world.getPlayer().setVelocity(0, this.world.getPlayer().getVelocity().getY());
         }
+
         if (this.world.getPlayer().onGround() && this.world.getPlayer().getGround().isFallable()){
             this.world.getPlayer().getGround().shrinkPlatform();
         }
-        this.world.getPlayer().fall();
+        this.world.getPlayer().checkFall();
+        this.world.getPlayer().assignGround();
         this.world.deleteFeltPlatforms();
         if (deltaT >= 1. / Constants.FPS) {
             gc.clearRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());

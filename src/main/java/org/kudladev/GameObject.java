@@ -11,6 +11,8 @@ public class GameObject implements DrawableObject {
 
     private boolean canGoThrough;
     private boolean canMoveObjects;
+    private Direction directionOfMoving;
+
 
     private boolean fallable;
 
@@ -18,11 +20,12 @@ public class GameObject implements DrawableObject {
 
 
 
-    public GameObject(double x, double y, double width,boolean canGoThrough, boolean canMoveObjects, boolean fallable) {
+    public GameObject(double x, double y, double width,boolean canGoThrough, boolean canMoveObjects, boolean fallable, Direction directionOfMoving) {
         this.object = new Rectangle2D(x,y,width,25);
         this.canGoThrough = canGoThrough;
         this.canMoveObjects = canMoveObjects;
         this.fallable = fallable;
+        this.directionOfMoving = directionOfMoving;
     }
 
     public Rectangle2D getObject() {
@@ -65,16 +68,39 @@ public class GameObject implements DrawableObject {
         this.movingSpeed = movingSpeed;
     }
 
+    public Direction getDirectionOfMoving() {
+        return directionOfMoving;
+    }
+
+    public void setDirectionOfMoving(Direction directionOfMoving) {
+        this.directionOfMoving = directionOfMoving;
+    }
+
+    public void setFallable(boolean fallable) {
+        this.fallable = fallable;
+    }
+
     @Override
     public void draw(GraphicsContext gc) {
-        gc.setFill(Color.RED);
+        if (canGoThrough){
+            gc.setFill(Color.RED);
+        } else if (!canGoThrough) {
+            gc.setFill(Color.ORANGE);
+        }
+        if (fallable){
+            gc.setFill(Color.YELLOW);
+        }
+        if (canMoveObjects){
+            gc.setFill(Color.LIME);
+        }
+
         gc.fillRect(object.getMinX(),object.getMinY(), object.getWidth(), object.getHeight());
     }
 
     public void shrinkPlatform(){
-        double newHeight = this.object.getHeight()-1;
+        double newHeight = this.object.getHeight()-0.4;
         if (newHeight >= 0){
-            this.object = new Rectangle2D(this.object.getMinX(),this.object.getMinY()+1,this.object.getWidth(),newHeight);
+            this.object = new Rectangle2D(this.object.getMinX(),this.object.getMinY(),this.object.getWidth(),newHeight);
         }else {
             this.object = new Rectangle2D(this.object.getMinX(),this.object.getMinY(),this.object.getWidth(),0);
         }

@@ -67,6 +67,7 @@ public class Player implements DrawableObject {
         velocity = velocity.add(0, Constants.GRAVITY * deltaT); // apply gravity
         position = position.add(velocity.multiply(deltaT)); // move player
         assignGround();
+        //checkMovingGround();
 
         // Correcting position in x-axis
         if (this.position.getX() < 0) {
@@ -78,21 +79,21 @@ public class Player implements DrawableObject {
             // Fixing position if player is above the top boundary
             this.position = new Point2D(this.position.getX(), 0);
             velocity = new Point2D(velocity.getX(), Constants.GRAVITY); // start falling again
-        } else if (this.jumped && !canGoThrough(Direction.NONE)) {
-            this.velocity = new Point2D(0,100);
         } else if (this.onGround() && velocity.getY() > 0) {
             // Fixing position if player is below the bottom boundary
             this.position = new Point2D(this.position.getX(), ground.getObject().getMinY() - this.size.getY());
             jumped = false;
             velocity = new Point2D(velocity.getX(), 0); // stop downward movement
-        }
-        if (fall){
-            if (getBoundingBox().getMaxY() < ground.getObject().getMinY()){
-                this.velocity = velocity.add(new Point2D(0.0, Constants.GRAVITY*deltaT));
-            } else {
-                fall = false;
+        } else if (this.jumped) {
+            for (int i = 0; i < this.world.getGameObjects().length; i++) {
+                if (i == 0) continue;
+                if (getBoundingBox().intersects(this.world.getGameObjects()[i].getObject()) && !this.world.getGameObjects()[i].isCanGoThrough()){
+                    this.velocity = new Point2D(0,100);
+                }
             }
         }
+        fall(deltaT);
+        System.out.println(fall);
 
     }
 
@@ -130,17 +131,34 @@ public class Player implements DrawableObject {
                     getBoundingBox().getMinX() > gameObject.getObject().getMinX() - size.getX() &&
                     getBoundingBox().getMaxY() - (size.getX() / 2) <= gameObject.getObject().getMinY()
             ) {
-                ground = gameObject;
+                if (ground.getObject().getMinY() > gameObject.getObject().getMinY() ||
+                        (getBoundingBox().getMaxX() < ground.getObject().getMinX() ||
+                                getBoundingBox().getMinX() > ground.getObject().getMaxX()))
+                {
+                    ground = gameObject;
+                }
             }
         }
     }
 
 
-    public void fall() {
+    public void checkFall() {
         if (!onGround() && !jumped) {
             assignGround();
             this.velocity = new Point2D(0.0,100.0);
             fall = true;
+        } else {
+            fall = false;
+        }
+    }
+
+    public void fall(double deltaT){
+        if (fall){
+            if (getBoundingBox().getMinY() < ground.getObject().getMinY()){
+                this.velocity = velocity.add(new Point2D(0.0, Constants.GRAVITY*deltaT));
+            } else {
+                fall = false;
+            }
         }
     }
 
@@ -156,10 +174,10 @@ public class Player implements DrawableObject {
                     if (getBoundingBox().intersects(this.world.getGameObjects()[i].getObject())){
                         switch (dir){
                             case LEFT -> {
-                                this.position = new Point2D(this.ground.getObject().getMinX(),this.position.getY());
+                                this.position = new Point2D(this.world.getGameObjects()[i].getObject().getMaxX(),this.position.getY());
                             }
                             case RIGHT -> {
-                                this.position = new Point2D(this.ground.getObject().getMaxX()-size.getX(),this.position.getY());
+                                this.position = new Point2D(this.world.getGameObjects()[i].getObject().getMinX()-size.getX(),this.position.getY());
                             }
                         }
                         return false;
@@ -170,6 +188,18 @@ public class Player implements DrawableObject {
         return true;
     }
 
+    public void checkMovingGround(){
+        if (ground.isCanMoveObjects()){
+            switch (ground.getDirectionOfMoving()){
+                case RIGHT -> {
+                    this.velocity = velocity.add(100,0);
+                }
+                case LEFT -> {
+                    this.velocity = velocity.add(-100,0);
+                }
+            }
+        }
+    }
 
     private boolean isInSameHeight(GameObject gameObject){
         if (gameObject.getObject().getMaxY() <= getBoundingBox().getMaxY()
