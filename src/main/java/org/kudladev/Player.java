@@ -4,10 +4,14 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import org.kudladev.damageable.DamageAble;
 import org.kudladev.platforms.Brick;
 import org.kudladev.platforms.MovingBelt;
 import org.kudladev.platforms.Platform;
 import org.kudladev.platforms.Trap;
+import org.kudladev.utils.Constants;
+import org.kudladev.utils.Direction;
+import org.kudladev.utils.DrawableObject;
 
 public class Player implements DrawableObject {
 
@@ -281,6 +285,29 @@ public class Player implements DrawableObject {
         }
     }
 
+    public void checkDamage(){
+        for (int i = 0; i < this.world.getDamageAbles().size(); i++) {
+            if (hitDamageAble(this.world.getDamageAbles().get(i))){
+                restartPlayer();
+                this.world.resetModels();
+            }
+        }
+    }
+
+    public void restartPlayer(){
+        this.position = new Point2D(0, world.getGameSize().getY() - size.getY());
+        this.velocity = new Point2D(0, 0);
+        this.jumped = false;
+        this.ground = world.getPlatforms().get(0);
+    }
+
+    private boolean hitDamageAble(DamageAble damageAble){
+        if (getBoundingBox().intersects(damageAble.getObject())){
+            return true;
+        } else {
+            return false;
+        }
+    }
     public void setDir(Direction dir){
         this.dir = dir;
     }

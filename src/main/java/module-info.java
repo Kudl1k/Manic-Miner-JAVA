@@ -5,4 +5,6 @@ module java1_2023_KUD0132{
         exports org.kudladev;
     exports org.kudladev.platforms;
     opens org.kudladev.platforms to javafx.fxml;
+    exports org.kudladev.utils;
+    opens org.kudladev.utils to javafx.fxml;
 }

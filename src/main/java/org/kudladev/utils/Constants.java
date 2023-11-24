@@ -1,4 +1,4 @@
-package org.kudladev;
+package org.kudladev.utils;
 
 public final class Constants {
 

@@ -2,7 +2,7 @@ package org.kudladev.platforms;
 
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
-import org.kudladev.Direction;
+import org.kudladev.utils.Direction;
 
 public class MovingBelt extends Platform{
 

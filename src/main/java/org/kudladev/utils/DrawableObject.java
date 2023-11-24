@@ -1,4 +1,4 @@
-package org.kudladev;
+package org.kudladev.utils;
 
 import javafx.scene.canvas.GraphicsContext;
 

@@ -2,7 +2,7 @@ package org.kudladev.platforms;
 
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
-import org.kudladev.DrawableObject;
+import org.kudladev.utils.DrawableObject;
 
 abstract public class Platform implements DrawableObject {
 

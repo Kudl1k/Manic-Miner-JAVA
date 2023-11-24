@@ -8,6 +8,7 @@ import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import org.kudladev.utils.Constants;
 
 public class App extends Application {
 

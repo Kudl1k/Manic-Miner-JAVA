@@ -4,6 +4,8 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import org.kudladev.utils.Constants;
+import org.kudladev.utils.Direction;
 
 public class DrawingThread extends AnimationTimer {
 
@@ -80,6 +82,7 @@ public class DrawingThread extends AnimationTimer {
         double deltaT = (now - lastTime) / 1e9;
         this.world.deleteFeltPlatforms();
         this.world.getPlayer().correctPosition(west,east);
+        this.world.getPlayer().checkDamage();
         if (deltaT >= 1. / Constants.FPS) {
             gc.clearRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
             gc.setFill(Color.BLACK);
@@ -90,6 +93,7 @@ public class DrawingThread extends AnimationTimer {
             world.draw(gc, ic);
             if (lastTime > 0) {
                 world.getPlayer().movement(deltaT);
+                world.simulate(deltaT);
             }
             lastTime = now;
         }
