@@ -3,6 +3,7 @@ package org.kudladev;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import org.kudladev.platforms.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,24 +16,26 @@ public class World {
 
     private List<GameObject> gameObjects = new ArrayList<>(); // Changed to ArrayList
 
+    private List<Platform> platforms = new ArrayList<>();
+
     World(Canvas gameCanvas, Canvas infoCanvas){
         this.gameSize = new Point2D(gameCanvas.getWidth(),gameCanvas.getHeight());
         this.infoSize = new Point2D(infoCanvas.getWidth(),infoCanvas.getHeight());
-        //GROUND
-        gameObjects.add(new GameObject(0, gameSize.getY(), gameSize.getX(), false, false, false,Direction.NONE));
-        //PLATFORMS
-        gameObjects.add(new GameObject(100, gameSize.getY()-51, 400, true, false, false,Direction.NONE));
-        gameObjects.add(new GameObject(750, gameSize.getY()-76, gameSize.getX()-750, true, false, false,Direction.NONE));
-        gameObjects.add(new GameObject(755, gameSize.getY()-130, gameSize.getX()-755, true, false, false,Direction.NONE));
-        //BRICK PLATFORM
-        gameObjects.add(new GameObject(500, gameSize.getY()-76, 100, false, false, false,Direction.NONE));
-        gameObjects.add(new GameObject(450, gameSize.getY()-170, 100, false, false, false,Direction.NONE));
-        //MOVEABLE PLATFORMS
-        gameObjects.add(new GameObject(150,gameSize.getY()-145,580,true,true,false,Direction.LEFT));
-        //FALLABLES
-        gameObjects.add(new GameObject(600, gameSize.getY()-76, 50, true, false, true,Direction.NONE));
-        gameObjects.add(new GameObject(650, gameSize.getY()-76, 50, true, false, true,Direction.NONE));
-        gameObjects.add(new GameObject(700, gameSize.getY()-76, 50, true, false, true,Direction.NONE));
+
+        platforms.add(new Ground(0, gameSize.getY(), gameSize.getX()));
+
+        platforms.add(new Ramp(100, gameSize.getY()-51, 400));
+        platforms.add(new Ramp(750, gameSize.getY()-76, gameSize.getX()-750));
+        platforms.add(new Ramp(755, gameSize.getY()-130, gameSize.getX()-755));
+
+        platforms.add(new Brick(500, gameSize.getY()-76, 100));
+        platforms.add(new Brick(450, gameSize.getY()-170, 100));
+
+        platforms.add(new MovingBelt(150,gameSize.getY()-145,580,Direction.LEFT));
+
+        platforms.add(new Trap(600, gameSize.getY()-76, 50));
+        platforms.add(new Trap(650, gameSize.getY()-76, 50));
+        platforms.add(new Trap(700, gameSize.getY()-76, 50));
 
 
         this.player = new Player(this);
@@ -40,8 +43,8 @@ public class World {
 
     void draw(GraphicsContext gc, GraphicsContext ic){
         player.draw(gc);
-        for (GameObject gameObject: gameObjects){
-            gameObject.draw(gc);
+        for (Platform platform: platforms){
+            platform.draw(gc);
         }
     }
 
@@ -58,12 +61,11 @@ public class World {
         return this.player;
     }
 
-    // Return as array
-    public GameObject[] getGameObjects() {
-        return gameObjects.toArray(new GameObject[0]);
+
+    public Platform[] getPlatforms() {
+        return platforms.toArray(new Platform[0]);
     }
 
-    // Removing using removeIf method of ArrayList
     public void deleteFeltPlatforms(){
         gameObjects.removeIf(gameObject -> gameObject.getObject().getHeight() == 0);
     }

@@ -4,6 +4,10 @@ import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
+import org.kudladev.platforms.Brick;
+import org.kudladev.platforms.MovingBelt;
+import org.kudladev.platforms.Platform;
+import org.kudladev.platforms.Trap;
 
 public class Player implements DrawableObject {
 
@@ -11,7 +15,7 @@ public class Player implements DrawableObject {
     private Point2D velocity;
     private final double speed;
     private boolean jumped;
-    private GameObject ground;
+    private Platform ground;
     private final Point2D size;
 
     private final World world;
@@ -27,7 +31,7 @@ public class Player implements DrawableObject {
         this.velocity = new Point2D(0, 0);
         this.speed = 100;
         this.jumped = false;
-        this.ground = world.getGameObjects()[0];
+        this.ground = world.getPlatforms()[0];
     }
 
     //SETTERS
@@ -40,9 +44,6 @@ public class Player implements DrawableObject {
         return velocity;
     }
 
-    public double getSpeed() {
-        return speed;
-    }
 
 
     public Rectangle2D getBoundingBox() {
@@ -64,27 +65,25 @@ public class Player implements DrawableObject {
 
 
     public void movement(double deltaT) {
-        velocity = velocity.add(0, Constants.GRAVITY * deltaT); // apply gravity
-        position = position.add(velocity.multiply(deltaT)); // move player
-        // Correcting position in x-axis
+        velocity = velocity.add(0, Constants.GRAVITY * deltaT);
+        position = position.add(velocity.multiply(deltaT));
         if (this.position.getX() < 0) {
             this.position = new Point2D(0, this.position.getY());
         } else if (this.position.getX() > this.world.getGameSize().getX() - this.size.getX()) {
             this.position = new Point2D(this.world.getGameSize().getX() - this.size.getX(), this.position.getY());
         }
         if (this.position.getY() < 0) {
-            // Fixing position if player is above the top boundary
             this.position = new Point2D(this.position.getX(), 0);
-            velocity = new Point2D(velocity.getX(), Constants.GRAVITY); // start falling again
+            velocity = new Point2D(velocity.getX(), Constants.GRAVITY);
         } else if (this.onGround() && velocity.getY() > 0) {
-            // Fixing position if player is below the bottom boundary
+
             this.position = new Point2D(this.position.getX(), ground.getObject().getMinY() - this.size.getY());
             jumped = false;
-            velocity = new Point2D(velocity.getX(), 0); // stop downward movement
+            velocity = new Point2D(velocity.getX(), 0);
         } else if (this.jumped) {
-            for (int i = 0; i < this.world.getGameObjects().length; i++) {
+            for (int i = 0; i < this.world.getPlatforms().length; i++) {
                 if (i == 0) continue;
-                if (getBoundingBox().intersects(this.world.getGameObjects()[i].getObject()) && !this.world.getGameObjects()[i].isCanGoThrough()){
+                if (getBoundingBox().intersects(this.world.getPlatforms()[i].getObject()) && (this.world.getPlatforms()[i] instanceof Brick)){
                     this.velocity = new Point2D(0,100);
                 }
             }
@@ -106,8 +105,8 @@ public class Player implements DrawableObject {
             velocity = new Point2D(0, velocity.getY());
         }
         checkMovingGround(west,east);
-        if (onGround() && ground.isFallable()){
-            ground.shrinkPlatform();
+        if (onGround() && ground instanceof Trap){
+            ((Trap) ground).shrinkPlatform();
         }
         checkFall();
         assignGround();
@@ -141,17 +140,17 @@ public class Player implements DrawableObject {
 
 
     public void assignGround() {
-        for (GameObject gameObject :
-                world.getGameObjects()) {
-            if (getBoundingBox().getMaxX() < gameObject.getObject().getMaxX() + size.getX() &&
-                    getBoundingBox().getMinX() > gameObject.getObject().getMinX() - size.getX() &&
-                    getBoundingBox().getMaxY() - (size.getX() / 2) <= gameObject.getObject().getMinY()
+        for (Platform platform :
+                world.getPlatforms()) {
+            if (getBoundingBox().getMaxX() < platform.getObject().getMaxX() + size.getX() &&
+                    getBoundingBox().getMinX() > platform.getObject().getMinX() - size.getX() &&
+                    getBoundingBox().getMaxY() - (size.getX() / 2) <= platform.getObject().getMinY()
             ) {
-                if (ground.getObject().getMinY() > gameObject.getObject().getMinY() ||
+                if (ground.getObject().getMinY() > platform.getObject().getMinY() ||
                         (getBoundingBox().getMaxX() < ground.getObject().getMinX() ||
                                 getBoundingBox().getMinX() > ground.getObject().getMaxX()))
                 {
-                    ground = gameObject;
+                    ground = platform;
                 }
             }
         }
@@ -183,17 +182,17 @@ public class Player implements DrawableObject {
     }
 
     public boolean canGoThrough(Direction dir) {
-        for (int i = 0; i < this.world.getGameObjects().length; i++) {
+        for (int i = 0; i < this.world.getPlatforms().length; i++) {
             if (i == 0) continue;
-            if (isInSameHeight(this.world.getGameObjects()[i])){
-                if (!this.world.getGameObjects()[i].isCanGoThrough()) {
-                    if (getBoundingBox().intersects(this.world.getGameObjects()[i].getObject())){
+            if (isInSameHeight(this.world.getPlatforms()[i])){
+                if (this.world.getPlatforms()[i] instanceof Brick) {
+                    if (getBoundingBox().intersects(this.world.getPlatforms()[i].getObject())){
                         switch (dir){
                             case LEFT -> {
-                                this.position = new Point2D(this.world.getGameObjects()[i].getObject().getMaxX(),this.position.getY());
+                                this.position = new Point2D(this.world.getPlatforms()[i].getObject().getMaxX(),this.position.getY());
                             }
                             case RIGHT -> {
-                                this.position = new Point2D(this.world.getGameObjects()[i].getObject().getMinX()-size.getX(),this.position.getY());
+                                this.position = new Point2D(this.world.getPlatforms()[i].getObject().getMinX()-size.getX(),this.position.getY());
                             }
                         }
                         return false;
@@ -208,8 +207,8 @@ public class Player implements DrawableObject {
         if (!onGround()){
             return;
         }
-        if (ground.isCanMoveObjects()){
-            switch (ground.getDirectionOfMoving()){
+        if (ground instanceof MovingBelt){
+            switch (((MovingBelt) ground).getDirectionOfMoving()){
                 case RIGHT -> {
                     if (west){
                         this.velocity = new Point2D(-50,getVelocity().getY());
@@ -229,23 +228,15 @@ public class Player implements DrawableObject {
         }
     }
 
-    private boolean isInSameHeight(GameObject gameObject){
-        if (gameObject.getObject().getMaxY() <= getBoundingBox().getMaxY()
-                && gameObject.getObject().getMinY() >= getBoundingBox().getMinY()){
+    private boolean isInSameHeight(Platform platform){
+        if (platform.getObject().getMaxY() <= getBoundingBox().getMaxY()
+                && platform.getObject().getMinY() >= getBoundingBox().getMinY()){
             return true;
         } else {
             return false;
         }
     }
 
-
-    public GameObject getGround() {
-        return ground;
-    }
-
-    public Direction getDir() {
-        return dir;
-    }
     public void setDir(Direction dir){
         this.dir = dir;
     }
