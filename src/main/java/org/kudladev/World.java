@@ -22,8 +22,8 @@ public class World {
 
 
     private List<Platform> platforms = new ArrayList<>();
-
     private List<DamageAble> damageAbles = new ArrayList<>();
+    private List<Collectible> collectibles = new ArrayList<>();
 
     World(Canvas gameCanvas, Canvas infoCanvas){
         this.gameSize = new Point2D(gameCanvas.getWidth(),gameCanvas.getHeight());
@@ -42,6 +42,9 @@ public class World {
         }
         for (DamageAble damageAble: damageAbles){
             damageAble.draw(gc);
+        }
+        for (Collectible collectible: collectibles){
+            collectible.draw(gc);
         }
     }
 
@@ -65,6 +68,10 @@ public class World {
 
     public List<DamageAble> getDamageAbles() {
         return damageAbles;
+    }
+
+    public List<Collectible> getCollectibles() {
+        return collectibles;
     }
 
     public void resetModels(){
@@ -112,7 +119,13 @@ public class World {
         damageAbles.add(new IceSpikes(230, 0, 25,25));
         damageAbles.add(new IceSpikes(400, 0, 25,25));
 
-        damageAbles.add(new NPC(180,gameSize.getY()-205,25,50,245));
+        damageAbles.add(new NPC(180,gameSize.getY()-195,25,40,245));
+
+        collectibles.add(new Collectible(gameSize.getX()-25,gameSize.getY()-225));
+        collectibles.add(new Collectible(180,0));
+        collectibles.add(new Collectible(400,25));
+        collectibles.add(new Collectible(650, gameSize.getY()-290));
+        collectibles.add(new Collectible(gameSize.getX()-50, 0));
 
     }
 

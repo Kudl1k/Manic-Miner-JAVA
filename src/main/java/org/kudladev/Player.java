@@ -26,6 +26,10 @@ public class Player implements DrawableObject {
 
     private boolean fall = false;
 
+    private int score = 0;
+
+    private int keys = 0;
+
     private Direction dir = Direction.NONE;
 
     Player(World world) {
@@ -135,10 +139,6 @@ public class Player implements DrawableObject {
                 && minYPlus12 < platformObject.getMaxY();
 
         if (intersects) {
-            System.out.println(intersects);
-            System.out.println(minYPlus12);
-            System.out.println(platformObject.getMinY());
-            System.out.println(platformObject.getMaxY());
             return true;
         }
 
@@ -297,17 +297,32 @@ public class Player implements DrawableObject {
     public void restartPlayer(){
         this.position = new Point2D(0, world.getGameSize().getY() - size.getY());
         this.velocity = new Point2D(0, 0);
+        this.keys = 0;
         this.jumped = false;
         this.ground = world.getPlatforms().get(0);
     }
 
     private boolean hitDamageAble(DamageAble damageAble){
-        if (getBoundingBox().intersects(damageAble.getObject())){
-            return true;
-        } else {
-            return false;
+        return getBoundingBox().intersects(damageAble.getObject());
+    }
+
+    private boolean hitCollectible(Collectible collectible){
+        return getBoundingBox().intersects(collectible.getObject());
+    }
+
+    public void checkCollectibles(){
+        for (int i = 0; i < this.world.getCollectibles().size(); i++) {
+            if (hitCollectible(this.world.getCollectibles().get(i))){
+                score += 100;
+                keys += 1;
+                this.world.getCollectibles().remove(i);
+                System.out.println(score);
+            }
         }
     }
+
+
+
     public void setDir(Direction dir){
         this.dir = dir;
     }
