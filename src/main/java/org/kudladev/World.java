@@ -28,7 +28,7 @@ public class World {
         gameObjects.add(new GameObject(500, gameSize.getY()-76, 100, false, false, false,Direction.NONE));
         gameObjects.add(new GameObject(450, gameSize.getY()-170, 100, false, false, false,Direction.NONE));
         //MOVEABLE PLATFORMS
-        gameObjects.add(new GameObject(150,gameSize.getY()-145,580,true,false,false,Direction.LEFT));
+        gameObjects.add(new GameObject(150,gameSize.getY()-145,580,true,true,false,Direction.LEFT));
         //FALLABLES
         gameObjects.add(new GameObject(600, gameSize.getY()-76, 50, true, false, true,Direction.NONE));
         gameObjects.add(new GameObject(650, gameSize.getY()-76, 50, true, false, true,Direction.NONE));

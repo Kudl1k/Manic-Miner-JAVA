@@ -66,9 +66,6 @@ public class Player implements DrawableObject {
     public void movement(double deltaT) {
         velocity = velocity.add(0, Constants.GRAVITY * deltaT); // apply gravity
         position = position.add(velocity.multiply(deltaT)); // move player
-        assignGround();
-        //checkMovingGround();
-
         // Correcting position in x-axis
         if (this.position.getX() < 0) {
             this.position = new Point2D(0, this.position.getY());
@@ -93,8 +90,27 @@ public class Player implements DrawableObject {
             }
         }
         fall(deltaT);
-        System.out.println(fall);
+    }
 
+
+    public void correctPosition(boolean west, boolean east){
+        if (west) {
+            if (onGround()){
+                checkCollision(Direction.LEFT);
+            }
+        } else if (east) {
+            if (onGround()){
+                checkCollision(Direction.RIGHT);
+            }
+        }else if (onGround() && !isJumped()) {
+            velocity = new Point2D(0, velocity.getY());
+        }
+        checkMovingGround(west,east);
+        if (onGround() && ground.isFallable()){
+            ground.shrinkPlatform();
+        }
+        checkFall();
+        assignGround();
     }
 
     public void checkCollision(Direction dir) {
@@ -102,7 +118,7 @@ public class Player implements DrawableObject {
             case RIGHT -> {
                 if (getBoundingBox().getMaxX() < world.getGameSize().getX()) {
                     if (this.world.getPlayer().canGoThrough(Direction.RIGHT)) {
-                        this.world.getPlayer().setVelocity(this.world.getPlayer().getSpeed(), this.world.getPlayer().getVelocity().getY());
+                        this.world.getPlayer().setVelocity(speed, velocity.getY());
                         this.world.getPlayer().setDir(Direction.RIGHT);
                     }
                 }
@@ -110,7 +126,7 @@ public class Player implements DrawableObject {
             case LEFT -> {
                 if (getBoundingBox().getMinX() >= 0) {
                     if (this.world.getPlayer().canGoThrough(Direction.LEFT)){
-                        this.world.getPlayer().setVelocity(-this.world.getPlayer().getSpeed(),this.world.getPlayer().getVelocity().getY());
+                        this.world.getPlayer().setVelocity(-speed,this.velocity.getY());
                         this.world.getPlayer().setDir(Direction.LEFT);
                     }
                 }
@@ -188,14 +204,26 @@ public class Player implements DrawableObject {
         return true;
     }
 
-    public void checkMovingGround(){
+    public void checkMovingGround(boolean west, boolean east){
+        if (!onGround()){
+            return;
+        }
         if (ground.isCanMoveObjects()){
             switch (ground.getDirectionOfMoving()){
                 case RIGHT -> {
-                    this.velocity = velocity.add(100,0);
+                    if (west){
+                        this.velocity = new Point2D(-50,getVelocity().getY());
+                    } else {
+                        this.velocity = new Point2D(speed,getVelocity().getY());
+                    }
                 }
                 case LEFT -> {
-                    this.velocity = velocity.add(-100,0);
+                    if (east){
+                        this.velocity = new Point2D(50,getVelocity().getY());
+                    } else {
+                        this.velocity = new Point2D(-speed,getVelocity().getY());
+
+                    }
                 }
             }
         }
