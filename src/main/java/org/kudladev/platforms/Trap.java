@@ -17,7 +17,7 @@ public class Trap extends Platform{
     }
 
     public void shrinkPlatform(){
-        double newHeight = this.object.getHeight()-0.4;
+        double newHeight = this.object.getHeight()-0.5;
         if (newHeight >= 0){
             this.object = new Rectangle2D(this.object.getMinX(),this.object.getMinY(),this.object.getWidth(),newHeight);
         }else {

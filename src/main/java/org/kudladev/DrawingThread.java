@@ -80,8 +80,6 @@ public class DrawingThread extends AnimationTimer {
         double deltaT = (now - lastTime) / 1e9;
         this.world.deleteFeltPlatforms();
         this.world.getPlayer().correctPosition(west,east);
-        System.out.println(this.world.getPlayer().onGround());
-        System.out.println(this.world.getPlayer().getGround());
         if (deltaT >= 1. / Constants.FPS) {
             gc.clearRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
             gc.setFill(Color.BLACK);

@@ -105,12 +105,42 @@ public class Player implements DrawableObject {
             velocity = new Point2D(0, velocity.getY());
         }
         checkMovingGround(west,east);
-        if (onGround() && ground instanceof Trap){
-            ((Trap) ground).shrinkPlatform();
+        if (onGround()){
+            for (int i = 0; i < this.world.getPlatforms().size(); i++) {
+                if (this.world.getPlatforms().get(i) instanceof Trap){
+                    if (intersectWithTrap((Trap) this.world.getPlatforms().get(i))){
+                        ((Trap) this.world.getPlatforms().get(i)).shrinkPlatform();
+                    }
+                }
+            }
         }
         assignGround();
         checkFall();
     }
+
+    private boolean intersectWithTrap(Trap platform) {
+        var boundingBox = getBoundingBox();
+        var platformObject = platform.getObject();
+
+        double minYPlus12 = boundingBox.getMaxY() + 0.1;
+
+
+        boolean intersects = boundingBox.getMaxX() > platformObject.getMinX()
+                && boundingBox.getMinX() < platformObject.getMaxX()
+                && minYPlus12 > platformObject.getMinY()
+                && minYPlus12 < platformObject.getMaxY();
+
+        if (intersects) {
+            System.out.println(intersects);
+            System.out.println(minYPlus12);
+            System.out.println(platformObject.getMinY());
+            System.out.println(platformObject.getMaxY());
+            return true;
+        }
+
+        return false;
+    }
+
 
     public void checkCollision(Direction dir) {
         switch (dir) {
@@ -226,13 +256,14 @@ public class Player implements DrawableObject {
                         this.velocity = new Point2D(-50,getVelocity().getY());
                     } else {
                         checkCollision(Direction.RIGHT);
-                        this.velocity = new Point2D(speed,getVelocity().getY());
                     }
                 }
                 case LEFT -> {
                     if (east){
+                        checkCollision(Direction.RIGHT);
                         this.velocity = new Point2D(50,getVelocity().getY());
                     } else {
+                        checkCollision(Direction.LEFT);
                         this.velocity = new Point2D(-speed,getVelocity().getY());
 
                     }
