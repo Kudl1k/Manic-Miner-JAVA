@@ -6,6 +6,7 @@ import javafx.scene.canvas.GraphicsContext;
 import org.kudladev.platforms.*;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class World {
@@ -14,7 +15,6 @@ public class World {
     private Point2D infoSize;
     private Player player;
 
-    private List<GameObject> gameObjects = new ArrayList<>(); // Changed to ArrayList
 
     private List<Platform> platforms = new ArrayList<>();
 
@@ -29,9 +29,9 @@ public class World {
         platforms.add(new Ramp(755, gameSize.getY()-130, gameSize.getX()-755));
 
         platforms.add(new Brick(500, gameSize.getY()-76, 100));
-        platforms.add(new Brick(450, gameSize.getY()-170, 100));
+        platforms.add(new Brick(450, gameSize.getY()-175, 100));
 
-        platforms.add(new MovingBelt(150,gameSize.getY()-145,580,Direction.LEFT));
+        platforms.add(new MovingBelt(150,gameSize.getY()-150,580,Direction.LEFT));
 
         platforms.add(new Trap(600, gameSize.getY()-76, 50));
         platforms.add(new Trap(650, gameSize.getY()-76, 50));
@@ -62,11 +62,21 @@ public class World {
     }
 
 
-    public Platform[] getPlatforms() {
-        return platforms.toArray(new Platform[0]);
+    public List<Platform> getPlatforms() {
+        return platforms;
     }
 
     public void deleteFeltPlatforms(){
-        gameObjects.removeIf(gameObject -> gameObject.getObject().getHeight() == 0);
+        Iterator<Platform> platformIterator = this.platforms.iterator();
+        while(platformIterator.hasNext()) {
+            Platform platform = platformIterator.next();
+            if(platform instanceof Trap) {
+                if (platform.getObject().getHeight() == 0){
+                    this.player.setGround(getPlatforms().get(0));
+                    platformIterator.remove();
+                    System.out.println("deleted");
+                }
+            }
+        }
     }
 }

@@ -31,7 +31,7 @@ public class Player implements DrawableObject {
         this.velocity = new Point2D(0, 0);
         this.speed = 100;
         this.jumped = false;
-        this.ground = world.getPlatforms()[0];
+        this.ground = world.getPlatforms().get(0);
     }
 
     //SETTERS
@@ -81,9 +81,9 @@ public class Player implements DrawableObject {
             jumped = false;
             velocity = new Point2D(velocity.getX(), 0);
         } else if (this.jumped) {
-            for (int i = 0; i < this.world.getPlatforms().length; i++) {
+            for (int i = 0; i < this.world.getPlatforms().size(); i++) {
                 if (i == 0) continue;
-                if (getBoundingBox().intersects(this.world.getPlatforms()[i].getObject()) && (this.world.getPlatforms()[i] instanceof Brick)){
+                if (getBoundingBox().intersects(this.world.getPlatforms().get(i).getObject()) && (this.world.getPlatforms().get(i) instanceof Brick)){
                     this.velocity = new Point2D(0,100);
                 }
             }
@@ -108,8 +108,8 @@ public class Player implements DrawableObject {
         if (onGround() && ground instanceof Trap){
             ((Trap) ground).shrinkPlatform();
         }
-        checkFall();
         assignGround();
+        checkFall();
     }
 
     public void checkCollision(Direction dir) {
@@ -135,13 +135,23 @@ public class Player implements DrawableObject {
 
 
     public boolean onGround() {
-        return getBoundingBox().getMaxY() >= ground.getObject().getMinY();
+        return getBoundingBox().getMaxY() >= ground.getObject().getMinY() && ground.getObject().getHeight() != 0;
     }
 
+    public Platform getGround() {
+        return ground;
+    }
+
+    public void setGround(Platform platform){
+        ground = platform;
+    }
 
     public void assignGround() {
         for (Platform platform :
                 world.getPlatforms()) {
+            if (platform.getObject().getHeight() == 0){
+                continue;
+            }
             if (getBoundingBox().getMaxX() < platform.getObject().getMaxX() + size.getX() &&
                     getBoundingBox().getMinX() > platform.getObject().getMinX() - size.getX() &&
                     getBoundingBox().getMaxY() - (size.getX() / 2) <= platform.getObject().getMinY()
@@ -182,17 +192,17 @@ public class Player implements DrawableObject {
     }
 
     public boolean canGoThrough(Direction dir) {
-        for (int i = 0; i < this.world.getPlatforms().length; i++) {
+        for (int i = 0; i < this.world.getPlatforms().size(); i++) {
             if (i == 0) continue;
-            if (isInSameHeight(this.world.getPlatforms()[i])){
-                if (this.world.getPlatforms()[i] instanceof Brick) {
-                    if (getBoundingBox().intersects(this.world.getPlatforms()[i].getObject())){
+            if (isInSameHeight(this.world.getPlatforms().get(i))){
+                if (this.world.getPlatforms().get(i) instanceof Brick) {
+                    if (getBoundingBox().intersects(this.world.getPlatforms().get(i).getObject())){
                         switch (dir){
                             case LEFT -> {
-                                this.position = new Point2D(this.world.getPlatforms()[i].getObject().getMaxX(),this.position.getY());
+                                this.position = new Point2D(this.world.getPlatforms().get(i).getObject().getMaxX(),this.position.getY());
                             }
                             case RIGHT -> {
-                                this.position = new Point2D(this.world.getPlatforms()[i].getObject().getMinX()-size.getX(),this.position.getY());
+                                this.position = new Point2D(this.world.getPlatforms().get(i).getObject().getMinX()-size.getX(),this.position.getY());
                             }
                         }
                         return false;
@@ -210,9 +220,12 @@ public class Player implements DrawableObject {
         if (ground instanceof MovingBelt){
             switch (((MovingBelt) ground).getDirectionOfMoving()){
                 case RIGHT -> {
+
                     if (west){
+                        checkCollision(Direction.LEFT);
                         this.velocity = new Point2D(-50,getVelocity().getY());
                     } else {
+                        checkCollision(Direction.RIGHT);
                         this.velocity = new Point2D(speed,getVelocity().getY());
                     }
                 }
