@@ -26,7 +26,8 @@ public class DrawingThread extends AnimationTimer {
 
     boolean west = false;
 
-    World world;
+    private World world;
+    private Info info;
 
     public DrawingThread(Canvas gameCanvas, Canvas infoCanvas){
         this.gameCanvas = gameCanvas;
@@ -35,6 +36,7 @@ public class DrawingThread extends AnimationTimer {
         this.ic = infoCanvas.getGraphicsContext2D();
 
         this.world = new World(gameCanvas,infoCanvas);
+        this.info = new Info(infoCanvas,this.world);
 
         gameCanvas.setFocusTraversable(true);
         gameCanvas.setOnKeyPressed(keyEvent -> {
@@ -84,14 +86,10 @@ public class DrawingThread extends AnimationTimer {
         this.world.getPlayer().correctPosition(west,east);
         this.world.getPlayer().checkDamage();
         this.world.getPlayer().checkCollectibles();
+        this.world.getPlayer().air(deltaT);
         if (deltaT >= 1. / Constants.FPS) {
-            gc.clearRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
-            gc.setFill(Color.BLACK);
-            gc.fillRect(0, 0, gameCanvas.getWidth(), gameCanvas.getHeight());
-            ic.clearRect(0, 0, infoCanvas.getWidth(), infoCanvas.getHeight());
-            ic.setFill(Color.RED);
-            ic.fillRect(0, 0, infoCanvas.getWidth(), infoCanvas.getHeight());
-            world.draw(gc, ic);
+            world.draw(gc);
+            info.draw(ic);
             if (lastTime > 0) {
                 world.getPlayer().movement(deltaT);
                 world.simulate(deltaT);

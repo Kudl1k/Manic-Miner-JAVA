@@ -29,6 +29,7 @@ public class App extends Application {
             root.getChildren().add(gameCanvas);
             root.getChildren().add(infoCanvas);
             Scene scene = new Scene(root, Constants.WINDOW_WIDTH, Constants.WINDOW_HEIGHT);
+            scene.getStylesheets().add(getClass().getResource("/fontstyle.css").toExternalForm());
             primaryStage.setScene(scene);
             primaryStage.resizableProperty().set(false);
             primaryStage.setTitle("Manic Miner - KUD0132");

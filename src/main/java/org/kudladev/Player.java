@@ -25,6 +25,7 @@ public class Player implements DrawableObject {
     private Direction dir = Direction.NONE;
 
     private int lives = 3;
+    private double air = 90;
     private int score = 0;
     private int keys = 0;
 
@@ -81,6 +82,15 @@ public class Player implements DrawableObject {
     }
     public SpriteSheetList getPlayerSprites() {
         return playerSprites;
+    }
+    public int getScore() {
+        return score;
+    }
+    public int getLives() {
+        return lives;
+    }
+    public double getAir() {
+        return air;
     }
 
     @Override
@@ -387,6 +397,13 @@ public class Player implements DrawableObject {
 
 
         }
+    }
+
+    public void air(double deltaT){
+        if (deltaT > 1){
+            return;
+        }
+        this.air -= deltaT;
     }
 
 

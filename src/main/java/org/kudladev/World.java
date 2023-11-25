@@ -3,6 +3,7 @@ package org.kudladev;
 import javafx.geometry.Point2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.paint.Color;
 import org.kudladev.damageable.DamageAble;
 import org.kudladev.damageable.IceSpikes;
 import org.kudladev.damageable.NPC;
@@ -25,6 +26,7 @@ public class World {
     private List<DamageAble> damageAbles = new ArrayList<>();
     private List<Collectible> collectibles = new ArrayList<>();
 
+
     World(Canvas gameCanvas, Canvas infoCanvas){
         this.gameSize = new Point2D(gameCanvas.getWidth(),gameCanvas.getHeight());
         this.infoSize = new Point2D(infoCanvas.getWidth(),infoCanvas.getHeight());
@@ -35,7 +37,10 @@ public class World {
         this.player = new Player(this);
     }
 
-    void draw(GraphicsContext gc, GraphicsContext ic){
+    void draw(GraphicsContext gc){
+        gc.clearRect(0, 0, gameSize.getX(), gameSize.getY());
+        gc.setFill(Color.BLACK);
+        gc.fillRect(0, 0, gameSize.getX(), gameSize.getY());
         player.draw(gc);
         for (Platform platform: platforms){
             platform.draw(gc);

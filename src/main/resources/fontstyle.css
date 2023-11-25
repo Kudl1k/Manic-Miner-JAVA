@@ -1,0 +1,7 @@
+@font-face {
+    src: url("dogicapixelbold.ttf");
+}
+
+.label {
+    -fx-font-family: 'Dogica Pixel';
+}
