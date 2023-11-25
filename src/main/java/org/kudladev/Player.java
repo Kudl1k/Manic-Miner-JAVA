@@ -9,28 +9,37 @@ import org.kudladev.platforms.Brick;
 import org.kudladev.platforms.MovingBelt;
 import org.kudladev.platforms.Platform;
 import org.kudladev.platforms.Trap;
-import org.kudladev.utils.Constants;
-import org.kudladev.utils.Direction;
-import org.kudladev.utils.DrawableObject;
+import org.kudladev.utils.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Player implements DrawableObject {
 
     private Point2D position;
+    private final Point2D size;
     private Point2D velocity;
     private final double speed;
     private boolean jumped;
-    private Platform ground;
-    private final Point2D size;
-
-    private final World world;
-
     private boolean fall = false;
+    private Direction dir = Direction.NONE;
 
+    private int lives = 3;
     private int score = 0;
-
     private int keys = 0;
 
-    private Direction dir = Direction.NONE;
+    private Platform ground;
+    private final World world;
+
+
+
+
+
+
+
+    private SpriteSheetList playerSprites = new SpriteSheetList();
+    private int currentAnimation = 0;
+
 
     Player(World world) {
         this.world = world;
@@ -40,28 +49,43 @@ public class Player implements DrawableObject {
         this.speed = 100;
         this.jumped = false;
         this.ground = world.getPlatforms().get(0);
+
+        playerSprites.add(new SpriteSheetValue(0,0,10,16));
+        playerSprites.add(new SpriteSheetValue(17,0, 10,16));
+        playerSprites.add(new SpriteSheetValue(35,0,10,16));
+        playerSprites.add(new SpriteSheetValue(53,0,10,16));
+        playerSprites.add(new SpriteSheetValue(118, 0, 10,16));
+        playerSprites.add(new SpriteSheetValue(101,0,10,16));
+        playerSprites.add(new SpriteSheetValue(83,0,10,16));
+        playerSprites.add(new SpriteSheetValue(65,0,10,16));
+
     }
 
     //SETTERS
     public void setVelocity(double x, double y) {
         this.velocity = new Point2D(x, y);
     }
+    public void setGround(Platform platform){
+        ground = platform;
+    }
+    public void setDir(Direction dir){
+        this.dir = dir;
+    }
 
     //GETTERS
     public Point2D getVelocity() {
         return velocity;
     }
-
-
-
     public Rectangle2D getBoundingBox() {
         return new Rectangle2D(position.getX(), position.getY(), size.getX(), size.getY());
     }
+    public SpriteSheetList getPlayerSprites() {
+        return playerSprites;
+    }
 
-
+    @Override
     public void draw(GraphicsContext gc) {
-        gc.setFill(Color.GREEN);
-        gc.fillRect(position.getX(), position.getY(), size.getX(), size.getY());
+        animate(dir,gc);
     }
 
     void jump() {
@@ -172,13 +196,7 @@ public class Player implements DrawableObject {
         return getBoundingBox().getMaxY() >= ground.getObject().getMinY() && ground.getObject().getHeight() != 0;
     }
 
-    public Platform getGround() {
-        return ground;
-    }
 
-    public void setGround(Platform platform){
-        ground = platform;
-    }
 
     public void assignGround() {
         for (Platform platform :
@@ -290,6 +308,7 @@ public class Player implements DrawableObject {
             if (hitDamageAble(this.world.getDamageAbles().get(i))){
                 restartPlayer();
                 this.world.resetModels();
+                this.lives -= 1;
             }
         }
     }
@@ -316,15 +335,62 @@ public class Player implements DrawableObject {
                 score += 100;
                 keys += 1;
                 this.world.getCollectibles().remove(i);
-                System.out.println(score);
             }
+        }
+    }
+
+    private void animate(Direction dir, GraphicsContext gc){
+        switch (dir){
+            case RIGHT -> {
+                switch ((int) ((this.position.getX() % 40)/10)){
+                    case 0 -> {
+                        gc.drawImage(Constants.SPRITESHEET, playerSprites.getSprites().get(0).sourceX(), playerSprites.getSprites().get(0).sourceY(), playerSprites.getSprites().get(0).sourceWidth(), playerSprites.getSprites().get(0).sourceHeight(), position.getX(), position.getY(), size.getX(), size.getY());
+                        this.currentAnimation = 0;
+                    }
+                    case 1 -> {
+                        gc.drawImage(Constants.SPRITESHEET, playerSprites.getSprites().get(1).sourceX(), playerSprites.getSprites().get(1).sourceY(), playerSprites.getSprites().get(1).sourceWidth(), playerSprites.getSprites().get(1).sourceHeight(), position.getX(), position.getY(), size.getX(), size.getY());
+                        this.currentAnimation = 1;
+                    }
+                    case 2 -> {
+                        gc.drawImage(Constants.SPRITESHEET, playerSprites.getSprites().get(2).sourceX(), playerSprites.getSprites().get(2).sourceY(), playerSprites.getSprites().get(2).sourceWidth(), playerSprites.getSprites().get(2).sourceHeight(), position.getX(), position.getY(), size.getX(), size.getY());
+                        this.currentAnimation = 2;
+                    }
+                    case 3 -> {
+                        gc.drawImage(Constants.SPRITESHEET, playerSprites.getSprites().get(3).sourceX(), playerSprites.getSprites().get(3).sourceY(), playerSprites.getSprites().get(3).sourceWidth(), playerSprites.getSprites().get(3).sourceHeight(), position.getX(), position.getY(), size.getX(), size.getY());
+                        this.currentAnimation = 3;
+                    }
+                }
+            }
+            case LEFT -> {
+                switch ((int) ((this.position.getX() % 40)/10)){
+                    case 0 -> {
+                        gc.drawImage(Constants.SPRITESHEET, playerSprites.getSprites().get(4).sourceX(), playerSprites.getSprites().get(4).sourceY(), playerSprites.getSprites().get(4).sourceWidth(), playerSprites.getSprites().get(4).sourceHeight(), position.getX(), position.getY(), size.getX(), size.getY());
+                        this.currentAnimation = 4;
+                    }
+                    case 1 -> {
+                        gc.drawImage(Constants.SPRITESHEET, playerSprites.getSprites().get(5).sourceX(), playerSprites.getSprites().get(5).sourceY(), playerSprites.getSprites().get(5).sourceWidth(), playerSprites.getSprites().get(5).sourceHeight(), position.getX(), position.getY(), size.getX(), size.getY());
+                        this.currentAnimation = 5;
+                    }
+                    case 2 -> {
+                        gc.drawImage(Constants.SPRITESHEET, playerSprites.getSprites().get(6).sourceX(), playerSprites.getSprites().get(6).sourceY(), playerSprites.getSprites().get(6).sourceWidth(), playerSprites.getSprites().get(6).sourceHeight(), position.getX(), position.getY(), size.getX(), size.getY());
+                        this.currentAnimation = 6;
+                    }
+                    case 3 -> {
+                        gc.drawImage(Constants.SPRITESHEET, playerSprites.getSprites().get(7).sourceX(), playerSprites.getSprites().get(7).sourceY(), playerSprites.getSprites().get(7).sourceWidth(), playerSprites.getSprites().get(7).sourceHeight(), position.getX(), position.getY(), size.getX(), size.getY());
+                        this.currentAnimation = 7;
+                    }
+                }
+            }
+            case NONE -> {
+                gc.drawImage(Constants.SPRITESHEET, playerSprites.getSprites().get(currentAnimation).sourceX(), playerSprites.getSprites().get(currentAnimation).sourceY(), playerSprites.getSprites().get(currentAnimation).sourceWidth(), playerSprites.getSprites().get(currentAnimation).sourceHeight(), position.getX(), position.getY(), size.getX(), size.getY());
+            }
+
+
         }
     }
 
 
 
-    public void setDir(Direction dir){
-        this.dir = dir;
-    }
+
 }
 

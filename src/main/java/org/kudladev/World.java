@@ -138,7 +138,6 @@ public class World {
                 if (platform.getObject().getHeight() == 0){
                     this.player.setGround(getPlatforms().get(0));
                     platformIterator.remove();
-                    System.out.println("deleted");
                 }
             }
         }

@@ -1,5 +1,7 @@
 package org.kudladev.utils;
 
+import javafx.scene.image.Image;
+
 public final class Constants {
 
 
@@ -16,6 +18,8 @@ public final class Constants {
     public static final int JUMPFORCE = 300;
 
     public static final int FPS = 100;
+
+    public static final Image SPRITESHEET = new Image("/spriteSheet.png");
 
 
 }
