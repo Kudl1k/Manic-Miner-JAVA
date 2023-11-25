@@ -3,16 +3,12 @@ package org.kudladev;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import org.kudladev.damageable.DamageAble;
 import org.kudladev.platforms.Brick;
 import org.kudladev.platforms.MovingBelt;
 import org.kudladev.platforms.Platform;
 import org.kudladev.platforms.Trap;
 import org.kudladev.utils.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class Player implements DrawableObject {
 
@@ -25,7 +21,7 @@ public class Player implements DrawableObject {
     private Direction dir = Direction.NONE;
 
     private int lives = 3;
-    private double air = 90;
+    private double air = 75;
     private int score = 0;
     private int keys = 0;
 
@@ -91,6 +87,9 @@ public class Player implements DrawableObject {
     }
     public double getAir() {
         return air;
+    }
+    public int getKeys() {
+        return keys;
     }
 
     @Override
@@ -316,19 +315,26 @@ public class Player implements DrawableObject {
     public void checkDamage(){
         for (int i = 0; i < this.world.getDamageAbles().size(); i++) {
             if (hitDamageAble(this.world.getDamageAbles().get(i))){
-                restartPlayer();
+                respawnPlayer();
                 this.world.resetModels();
                 this.lives -= 1;
             }
         }
     }
 
-    public void restartPlayer(){
+    private void respawnPlayer(){
         this.position = new Point2D(0, world.getGameSize().getY() - size.getY());
         this.velocity = new Point2D(0, 0);
         this.keys = 0;
+        this.air = 75;
         this.jumped = false;
         this.ground = world.getPlatforms().get(0);
+    }
+
+    public void restartPlayer(){
+        respawnPlayer();
+        this.lives = 3;
+        this.score = 0;
     }
 
     private boolean hitDamageAble(DamageAble damageAble){
@@ -405,6 +411,11 @@ public class Player implements DrawableObject {
         }
         this.air -= deltaT;
     }
+
+    public boolean checkEnd(){
+        return lives == 0;
+    }
+
 
 
 

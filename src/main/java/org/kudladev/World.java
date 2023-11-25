@@ -1,6 +1,7 @@
 package org.kudladev;
 
 import javafx.geometry.Point2D;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.paint.Color;
@@ -11,6 +12,7 @@ import org.kudladev.damageable.Tree;
 import org.kudladev.platforms.*;
 import org.kudladev.utils.Direction;
 
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -33,6 +35,8 @@ public class World {
 
         resetModels();
 
+        this.end = new Rectangle2D(gameSize.getX()-45,gameSize.getY()-45,40,40);
+
 
         this.player = new Player(this);
     }
@@ -51,6 +55,7 @@ public class World {
         for (Collectible collectible: collectibles){
             collectible.draw(gc);
         }
+        displayEnd(gc);
     }
 
     // GETTERS
@@ -78,6 +83,8 @@ public class World {
     public List<Collectible> getCollectibles() {
         return collectibles;
     }
+
+    private Rectangle2D end;
 
     public void resetModels(){
         platforms.clear();
@@ -148,6 +155,19 @@ public class World {
         }
     }
 
+    public void displayEnd(GraphicsContext gc){
+        if (this.player.getKeys() == 5){
+            gc.setFill(Color.YELLOW);
+            gc.fillRect(gameSize.getX()-50,gameSize.getY()-50,50,50);
+            gc.setFill(Color.BLUE);
+            gc.fillRect(gameSize.getX()-45,gameSize.getY()-45,40,40);
+
+        } else {
+            gc.setFill(Color.YELLOW);
+            gc.fillRect(gameSize.getX()-50,gameSize.getY()-50,50,50);
+        }
+    }
+
     public void simulate(double deltaT){
         for (DamageAble damageAble:
              damageAbles) {
@@ -155,6 +175,42 @@ public class World {
                 ((NPC) damageAble).simulate(deltaT);
             }
         }
+    }
+
+    public void checkGameState(){
+        if (this.player.checkEnd()){
+            if (loadScoreFromFile() < getPlayer().getScore()){
+                saveScoreToFile(this.player.getScore());
+            }
+            this.player.restartPlayer();
+        } else if (this.player.getKeys() == 5 && this.player.getBoundingBox().intersects(end)) {
+            //TODO END
+            this.resetModels();
+            this.player.restartPlayer();
+        }
+    }
+
+
+    public void saveScoreToFile(int score){
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/score.txt"))) {
+            String scoreStr = Integer.toString(score);
+            writer.write(scoreStr);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public int loadScoreFromFile(){
+        int score = 0;
+        try (BufferedReader reader = new BufferedReader(new FileReader("data/score.txt"))) {
+            String line = reader.readLine();
+            if(line != null) {
+                score = Integer.parseInt(line.trim());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return score;
     }
 
 }

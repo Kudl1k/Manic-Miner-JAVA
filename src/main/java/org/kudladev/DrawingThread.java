@@ -87,6 +87,7 @@ public class DrawingThread extends AnimationTimer {
         this.world.getPlayer().checkDamage();
         this.world.getPlayer().checkCollectibles();
         this.world.getPlayer().air(deltaT);
+        this.world.checkGameState();
         if (deltaT >= 1. / Constants.FPS) {
             world.draw(gc);
             info.draw(ic);
