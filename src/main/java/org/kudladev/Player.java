@@ -18,6 +18,8 @@ public class Player implements DrawableObject {
     private final double speed;
     private boolean jumped;
     private boolean fall = false;
+    private double timeInAir = 0;
+    private boolean fallDamage = false;
     private Direction dir = Direction.NONE;
 
     private int lives = 3;
@@ -91,6 +93,9 @@ public class Player implements DrawableObject {
     public int getKeys() {
         return keys;
     }
+    public double getTimeInAir(){
+        return timeInAir;
+    }
 
     @Override
     public void draw(GraphicsContext gc) {
@@ -117,7 +122,6 @@ public class Player implements DrawableObject {
             this.position = new Point2D(this.position.getX(), 0);
             velocity = new Point2D(velocity.getX(), Constants.GRAVITY);
         } else if (this.onGround() && velocity.getY() > 0) {
-
             this.position = new Point2D(this.position.getX(), ground.getObject().getMinY() - this.size.getY());
             jumped = false;
             velocity = new Point2D(velocity.getX(), 0);
@@ -130,6 +134,7 @@ public class Player implements DrawableObject {
             }
         }
         fall(deltaT);
+        timeInAirTimer();
     }
 
 
@@ -320,6 +325,15 @@ public class Player implements DrawableObject {
                 this.lives -= 1;
             }
         }
+        if (timeInAir > 30){
+            fallDamage = true;
+        }
+        if (fallDamage && onGround()){
+            respawnPlayer();
+            this.world.resetModels();
+            this.lives -= 1;
+            fallDamage = false;
+        }
     }
 
     private void respawnPlayer(){
@@ -414,6 +428,14 @@ public class Player implements DrawableObject {
 
     public boolean checkEnd(){
         return lives == 0;
+    }
+
+    private void timeInAirTimer(){
+        if (this.velocity.getY() > 0){
+            this.timeInAir += 1;
+        } else {
+            this.timeInAir = 0;
+        }
     }
 
 

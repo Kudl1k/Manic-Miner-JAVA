@@ -60,7 +60,6 @@ public class Info {
     }
 
     private void adjustAirDisplay(){
-        System.out.println(maxAir*(this.world.getPlayer().getAir()/75));
         this.airProgressBar = new Rectangle2D(this.airProgressBar.getMinX(),this.airProgressBar.getMinY(),maxAir*(this.world.getPlayer().getAir()/75),this.airProgressBar.getHeight());
     }
 
