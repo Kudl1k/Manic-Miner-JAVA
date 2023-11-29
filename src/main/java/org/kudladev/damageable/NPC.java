@@ -99,4 +99,6 @@ public class NPC extends DamageAble{
         this.object = new Rectangle2D(this.object.getMinX() + value,this.object.getMinY(),this.object.getWidth(),this.object.getHeight());
     }
 
+
+
 }

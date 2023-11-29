@@ -60,7 +60,12 @@ public class Info {
     }
 
     private void adjustAirDisplay(){
-        this.airProgressBar = new Rectangle2D(this.airProgressBar.getMinX(),this.airProgressBar.getMinY(),maxAir*(this.world.getPlayer().getAir()/75),this.airProgressBar.getHeight());
+        if (maxAir*(this.world.getPlayer().getAir()/75) <= 0){
+            this.airProgressBar = new Rectangle2D(this.airProgressBar.getMinX(),this.airProgressBar.getMinY(),0,this.airProgressBar.getHeight());
+        } else {
+            this.airProgressBar = new Rectangle2D(this.airProgressBar.getMinX(),this.airProgressBar.getMinY(),maxAir*(this.world.getPlayer().getAir()/75),this.airProgressBar.getHeight());
+
+        }
     }
 
     private void displayHighScore(GraphicsContext ic){

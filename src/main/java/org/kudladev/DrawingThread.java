@@ -3,9 +3,7 @@ package org.kudladev;
 import javafx.animation.AnimationTimer;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
-import org.kudladev.utils.Constants;
-import org.kudladev.utils.Direction;
+import org.kudladev.utils.*;
 
 public class DrawingThread extends AnimationTimer {
 
@@ -23,6 +21,8 @@ public class DrawingThread extends AnimationTimer {
 
     private final Canvas lowerCanvas;
 
+    private final Screens screens;
+
     boolean north = false;
     boolean south = false;
 
@@ -33,6 +33,10 @@ public class DrawingThread extends AnimationTimer {
     private World world;
     private Info info;
 
+    private Menu menuState;
+
+    private Music music;
+
     public DrawingThread(Canvas gameCanvas, Canvas infoCanvas,Canvas lowerCanvas) {
         this.gameCanvas = gameCanvas;
         this.infoCanvas = infoCanvas;
@@ -42,26 +46,48 @@ public class DrawingThread extends AnimationTimer {
         this.ic = infoCanvas.getGraphicsContext2D();
         this.lc = lowerCanvas.getGraphicsContext2D();
 
-        this.world = new World(gameCanvas,infoCanvas);
+        this.music = new Music();
+        this.menuState = Menu.LOADING;
+
+
+        this.world = new World(gameCanvas,infoCanvas,this.music);
         this.info = new Info(infoCanvas,this.world);
+        this.screens = new Screens(this.world);
+
+
+
 
 
         gameCanvas.setFocusTraversable(true);
         gameCanvas.setOnKeyPressed(keyEvent -> {
             switch (keyEvent.getCode()){
                 case A -> {
-                    if (!east){
+                    if (!east && this.world.getPlayer().getState() == GameState.RUNNING){
                         west = true;
                     }
                 }
                 case D -> {
-                    if (!west){
+                    if (!west && this.world.getPlayer().getState() == GameState.RUNNING){
                         east = true;
                     }
                 }
                 case SPACE -> {
-                    if (this.world.getPlayer().onGround()){
+                    if (this.world.getPlayer().onGround() && this.world.getPlayer().getState() == GameState.RUNNING){
                         this.world.getPlayer().jump();
+                        music.playJumping();
+                    }
+                }
+                case ENTER -> {
+                    if (this.menuState == Menu.LOADING){
+                        this.menuState = Menu.MAIN;
+                    } else if (this.menuState == Menu.MAIN) {
+                        this.world.getPlayer().setState(GameState.RUNNING);
+                        west = false;
+                        east = false;
+                        this.world.getPlayer().restartPlayer();
+                        this.menuState = Menu.GAME;
+                    } else if (this.menuState == Menu.WIN || this.menuState == Menu.LOSE) {
+                        this.menuState = Menu.MAIN;
                     }
                 }
             }
@@ -69,15 +95,20 @@ public class DrawingThread extends AnimationTimer {
         gameCanvas.setOnKeyReleased(keyEvent -> {
             switch (keyEvent.getCode()){
                 case A -> {
-                    west = false;
-                    if (this.world.getPlayer().onGround()){
-                        this.world.getPlayer().checkCollision(Direction.LEFT);
+                    if (this.world.getPlayer().getState() == GameState.RUNNING){
+                        west = false;
+                        if (this.world.getPlayer().onGround()){
+                            this.world.getPlayer().checkCollision(Direction.LEFT);
+                        }
                     }
+
                 }
                 case D -> {
-                    east = false;
-                    if (this.world.getPlayer().onGround()){
-                        this.world.getPlayer().checkCollision(Direction.RIGHT);
+                    if (this.world.getPlayer().getState() == GameState.RUNNING) {
+                        east = false;
+                        if (this.world.getPlayer().onGround()) {
+                            this.world.getPlayer().checkCollision(Direction.RIGHT);
+                        }
                     }
                 }
             }
@@ -89,24 +120,70 @@ public class DrawingThread extends AnimationTimer {
 
     @Override
     public void handle(long now) {
+
         double deltaT = (now - lastTime) / 1e9;
-        this.world.deleteFeltPlatforms();
-        this.world.getPlayer().correctPosition(west,east);
-        this.world.getPlayer().checkDamage();
-        this.world.getPlayer().checkCollectibles();
-        this.world.getPlayer().air(deltaT);
-        this.world.checkGameState();
-        if (deltaT >= 1. / Constants.FPS) {
-            lc.clearRect(0,0, lowerCanvas.getWidth(),lowerCanvas.getHeight());
-            lc.setFill(Color.PURPLE);
-            lc.fillRect(0,0,lowerCanvas.getWidth(),lowerCanvas.getHeight());
-            world.draw(gc);
-            info.draw(ic);
-            if (lastTime > 0) {
-                world.getPlayer().movement(deltaT);
-                world.simulate(deltaT);
+        switch (menuState){
+            case LOADING -> {
+                music.playTune();
+                if (deltaT >= 1. / Constants.FPS) {
+                    this.screens.loadingScreen(lc);
+                    if (lastTime > 0) {
+                        screens.clock(deltaT);
+                    }
+                    lastTime = now;
+                }
             }
-            lastTime = now;
+            case MAIN -> {
+                music.getTunePlayer().stop();
+                this.screens.mainScreen(lc);
+            }
+            case GAME -> {
+                if (this.world.getPlayer().getState() == GameState.RUNNING){
+                    this.world.deleteFeltPlatforms();
+                    this.world.getPlayer().correctPosition(west,east);
+                    this.world.getPlayer().checkDamage();
+                    this.world.getPlayer().checkCollectibles();
+                    this.world.getPlayer().air(deltaT);
+                    this.world.checkGameState();
+                }
+                if (deltaT >= 1. / Constants.FPS) {
+                    world.draw(gc);
+                    info.draw(ic);
+                    if (lastTime > 0) {
+                        if (this.world.getPlayer().getState() == GameState.RUNNING){
+                            world.getPlayer().movement(deltaT);
+                            world.simulate(deltaT);
+                        } else {
+                            world.getPlayer().endGame(deltaT);
+                        }
+                    }
+                    lastTime = now;
+                }
+                if (this.world.getPlayer().getState() == GameState.RUNNING){
+                    this.music.playInGameTune();
+                } else {
+                    this.music.getFallingPlayer().stop();
+                    this.music.getJumpingPlayer().stop();
+                    this.music.getInGameTunePlayer().stop();
+                    if (this.world.getPlayer().getState() == GameState.WIN){
+                        this.menuState = Menu.WIN;
+                        clearUpperCanvases();
+                    } else if (this.world.getPlayer().getState() == GameState.LOSE) {
+                        this.menuState = Menu.LOSE;
+                        clearUpperCanvases();
+                    }
+                }
+            }
+            case LOSE,WIN -> {
+                screens.endScreen(lc);
+            }
+
         }
     }
+
+    private void clearUpperCanvases(){
+        gc.clearRect(0,0,Constants.GAME_WINDOW_WIDTH,Constants.GAME_HEIGHT);
+        ic.clearRect(0,0,Constants.GAME_WINDOW_WIDTH,Constants.INFO_HEIGHT);
+    }
 }
+

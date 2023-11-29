@@ -41,7 +41,7 @@ public class App extends Application {
             primaryStage.setScene(scene);
             primaryStage.resizableProperty().set(false);
             primaryStage.setTitle("Manic Miner - KUD0132");
-            primaryStage.getIcons().add(new Image("manicminer.png"));
+            primaryStage.getIcons().add(new Image("/manicminer.png"));
             primaryStage.show();
 
             // Exit program when main window is closed

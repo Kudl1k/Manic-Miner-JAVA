@@ -30,6 +30,9 @@ public class Player implements DrawableObject {
     private Platform ground;
     private final World world;
 
+    private final Music music;
+
+    private GameState state = GameState.RUNNING;
 
 
 
@@ -40,7 +43,7 @@ public class Player implements DrawableObject {
     private int currentAnimation = 0;
 
 
-    Player(World world) {
+    Player(World world,Music music) {
         this.world = world;
         this.size = new Point2D(25, 50);
         this.position = new Point2D(0, world.getGameSize().getY() - size.getY());
@@ -48,6 +51,7 @@ public class Player implements DrawableObject {
         this.speed = 100;
         this.jumped = false;
         this.ground = world.getPlatforms().get(0);
+        this.music = music;
 
         playerSprites.add(new SpriteSheetValue(0,0,10,16));
         playerSprites.add(new SpriteSheetValue(17,0, 10,16));
@@ -71,6 +75,9 @@ public class Player implements DrawableObject {
         this.dir = dir;
     }
 
+    public void setState(GameState state) {
+        this.state = state;
+    }
     //GETTERS
     public Point2D getVelocity() {
         return velocity;
@@ -97,6 +104,10 @@ public class Player implements DrawableObject {
         return timeInAir;
     }
 
+    public GameState getState() {
+        return state;
+    }
+
     @Override
     public void draw(GraphicsContext gc) {
         animate(dir,gc);
@@ -111,8 +122,17 @@ public class Player implements DrawableObject {
 
 
     public void movement(double deltaT) {
+        System.out.println(keys);
         velocity = velocity.add(0, Constants.GRAVITY * deltaT);
         position = position.add(velocity.multiply(deltaT));
+        if (this.onGround()){
+            music.getJumpingPlayer().stop();
+        }
+        if (this.fall){
+            music.playFalling();
+        } else {
+            music.getFallingPlayer().stop();
+        }
         if (this.position.getX() < 0) {
             this.position = new Point2D(0, this.position.getY());
         } else if (this.position.getX() > this.world.getGameSize().getX() - this.size.getX()) {
@@ -134,7 +154,7 @@ public class Player implements DrawableObject {
             }
         }
         fall(deltaT);
-        timeInAirTimer();
+        timeInAirTimer(deltaT);
     }
 
 
@@ -247,8 +267,6 @@ public class Player implements DrawableObject {
         if (fall){
             if (getBoundingBox().getMinY() < ground.getObject().getMinY()){
                 this.velocity = velocity.add(new Point2D(0.0, Constants.GRAVITY*deltaT));
-            } else {
-                fall = false;
             }
         }
     }
@@ -325,8 +343,13 @@ public class Player implements DrawableObject {
                 this.lives -= 1;
             }
         }
-        if (timeInAir > 30){
+        if (timeInAir > 120){
             fallDamage = true;
+        }
+        if (air <= 1){
+            respawnPlayer();
+            this.world.resetModels();
+            this.lives -=1;
         }
         if (fallDamage && onGround()){
             respawnPlayer();
@@ -363,10 +386,14 @@ public class Player implements DrawableObject {
         for (int i = 0; i < this.world.getCollectibles().size(); i++) {
             if (hitCollectible(this.world.getCollectibles().get(i))){
                 score += 100;
-                keys += 1;
                 this.world.getCollectibles().remove(i);
+                countKeys();
             }
         }
+    }
+
+    private void countKeys(){
+        this.keys = 5-this.world.getCollectibles().size();
     }
 
     private void animate(Direction dir, GraphicsContext gc){
@@ -425,19 +452,38 @@ public class Player implements DrawableObject {
         }
         this.air -= deltaT;
     }
+    public void endGame(double deltaT){
+        if (deltaT > 0.5){
+            return;
+        }
+        if (this.air <= 1){
+            this.music.getGameOverPlayer().stop();
+            if (checkEnd()) {
+                this.state = GameState.LOSE;
+                this.world.checkHighScore();
+            } else {
+                this.state = GameState.WIN;
+                this.world.checkHighScore();
+            }
+        } else {
+            this.air -= deltaT * 35;
+            this.score += 20;
+            this.music.playGameOver();
+            this.state = GameState.SCORE;
+        }
+    }
 
     public boolean checkEnd(){
         return lives == 0;
     }
 
-    private void timeInAirTimer(){
+    private void timeInAirTimer(double deltaT){
         if (this.velocity.getY() > 0){
-            this.timeInAir += 1;
+            this.timeInAir += (velocity.getY() * deltaT);
         } else {
             this.timeInAir = 0;
         }
     }
-
 
 
 

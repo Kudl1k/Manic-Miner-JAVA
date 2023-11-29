@@ -11,6 +11,8 @@ import org.kudladev.damageable.NPC;
 import org.kudladev.damageable.Tree;
 import org.kudladev.platforms.*;
 import org.kudladev.utils.Direction;
+import org.kudladev.utils.GameState;
+import org.kudladev.utils.Music;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -29,7 +31,7 @@ public class World {
     private List<Collectible> collectibles = new ArrayList<>();
 
 
-    World(Canvas gameCanvas, Canvas infoCanvas){
+    World(Canvas gameCanvas, Canvas infoCanvas, Music music){
         this.gameSize = new Point2D(gameCanvas.getWidth(),gameCanvas.getHeight());
         this.infoSize = new Point2D(infoCanvas.getWidth(),infoCanvas.getHeight());
 
@@ -38,7 +40,7 @@ public class World {
         this.end = new Rectangle2D(gameSize.getX()-45,gameSize.getY()-45,40,40);
 
 
-        this.player = new Player(this);
+        this.player = new Player(this,music);
     }
 
     void draw(GraphicsContext gc){
@@ -179,24 +181,25 @@ public class World {
 
     public void checkGameState(){
         if (this.player.checkEnd()){
-            if (loadScoreFromFile() < getPlayer().getScore()){
-                saveScoreToFile(this.player.getScore());
-            }
-            this.player.restartPlayer();
+            this.player.setState(GameState.LOSE);
         } else if (this.player.getKeys() == 5 && this.player.getBoundingBox().intersects(end)) {
-            //TODO END
-            this.resetModels();
-            this.player.restartPlayer();
+            this.player.setState(GameState.SCORE);
         }
     }
 
 
-    public void saveScoreToFile(int score){
+    private void saveScoreToFile(int score){
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("data/score.txt"))) {
             String scoreStr = Integer.toString(score);
             writer.write(scoreStr);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void checkHighScore(){
+        if (loadScoreFromFile() < this.player.getScore()){
+            saveScoreToFile(this.player.getScore());
         }
     }
 
