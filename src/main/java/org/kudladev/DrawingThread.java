@@ -15,9 +15,13 @@ public class DrawingThread extends AnimationTimer {
 
     private final GraphicsContext ic;
 
+    private final GraphicsContext lc;
+
     private final Canvas gameCanvas;
 
     private final Canvas infoCanvas;
+
+    private final Canvas lowerCanvas;
 
     boolean north = false;
     boolean south = false;
@@ -29,14 +33,18 @@ public class DrawingThread extends AnimationTimer {
     private World world;
     private Info info;
 
-    public DrawingThread(Canvas gameCanvas, Canvas infoCanvas){
+    public DrawingThread(Canvas gameCanvas, Canvas infoCanvas,Canvas lowerCanvas) {
         this.gameCanvas = gameCanvas;
         this.infoCanvas = infoCanvas;
+        this.lowerCanvas = lowerCanvas;
+
         this.gc = gameCanvas.getGraphicsContext2D();
         this.ic = infoCanvas.getGraphicsContext2D();
+        this.lc = lowerCanvas.getGraphicsContext2D();
 
         this.world = new World(gameCanvas,infoCanvas);
         this.info = new Info(infoCanvas,this.world);
+
 
         gameCanvas.setFocusTraversable(true);
         gameCanvas.setOnKeyPressed(keyEvent -> {
@@ -89,6 +97,9 @@ public class DrawingThread extends AnimationTimer {
         this.world.getPlayer().air(deltaT);
         this.world.checkGameState();
         if (deltaT >= 1. / Constants.FPS) {
+            lc.clearRect(0,0, lowerCanvas.getWidth(),lowerCanvas.getHeight());
+            lc.setFill(Color.PURPLE);
+            lc.fillRect(0,0,lowerCanvas.getWidth(),lowerCanvas.getHeight());
             world.draw(gc);
             info.draw(ic);
             if (lastTime > 0) {
