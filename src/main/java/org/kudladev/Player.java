@@ -470,7 +470,7 @@ public class Player implements DrawableObject {
             }
         } else {
             this.air -= deltaT * 35;
-            this.score += (5*keys);
+            this.score += (5*(keys+1)) ;
             this.music.playGameOver();
             this.state = GameState.SCORE;
         }

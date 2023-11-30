@@ -124,11 +124,9 @@ public class Music {
 
 
     public void playDie(){
+        diePlayer.setAutoPlay(true);
         diePlayer.setVolume(0.04);
         gameOverPlayer.setRate(2.0);
-        if (!diePlayer.getStatus().equals(MediaPlayer.Status.PLAYING)){
-            diePlayer.seek(Duration.ZERO);
-        }
         diePlayer.play();
     }
 
