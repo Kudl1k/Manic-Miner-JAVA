@@ -19,6 +19,8 @@ public class Music {
 
     private MediaPlayer gameOverPlayer;
 
+    private MediaPlayer diePlayer;
+
 
     public MediaPlayer getTunePlayer() {
         return tunePlayer;
@@ -60,6 +62,10 @@ public class Music {
         resource = getClass().getResource(Constants.gameOverPath);
         media = new Media(resource.toString());
         this.gameOverPlayer = new MediaPlayer(media);
+
+        resource = getClass().getResource(Constants.diePath);
+        media = new Media(resource.toString());
+        this.diePlayer = new MediaPlayer(media);
     }
 
     public void playTune(){
@@ -110,9 +116,21 @@ public class Music {
 
     public void playGameOver(){
         gameOverPlayer.setVolume(0.04);
+        if (!gameOverPlayer.getStatus().equals(MediaPlayer.Status.PLAYING)){
+            gameOverPlayer.seek(Duration.ZERO);
+        }
         gameOverPlayer.play();
     }
 
+
+    public void playDie(){
+        diePlayer.setVolume(0.04);
+        gameOverPlayer.setRate(2.0);
+        if (!diePlayer.getStatus().equals(MediaPlayer.Status.PLAYING)){
+            diePlayer.seek(Duration.ZERO);
+        }
+        diePlayer.play();
+    }
 
 
 }

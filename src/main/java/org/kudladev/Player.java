@@ -338,6 +338,7 @@ public class Player implements DrawableObject {
     public void checkDamage(){
         for (int i = 0; i < this.world.getDamageAbles().size(); i++) {
             if (hitDamageAble(this.world.getDamageAbles().get(i))){
+                music.playDie();
                 respawnPlayer();
                 this.world.resetModels();
                 this.lives -= 1;
@@ -347,11 +348,13 @@ public class Player implements DrawableObject {
             fallDamage = true;
         }
         if (air <= 1){
+            music.playDie();
             respawnPlayer();
             this.world.resetModels();
             this.lives -=1;
         }
         if (fallDamage && onGround()){
+            music.playDie();
             respawnPlayer();
             this.world.resetModels();
             this.lives -= 1;
@@ -467,7 +470,7 @@ public class Player implements DrawableObject {
             }
         } else {
             this.air -= deltaT * 35;
-            this.score += 20;
+            this.score += (5*keys);
             this.music.playGameOver();
             this.state = GameState.SCORE;
         }

@@ -39,5 +39,7 @@ public final class Constants {
 
     public static final String gameOverPath = "/game-over.mp3";
 
+    public static final String diePath = "/die.wav";
+
 
 }
